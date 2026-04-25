@@ -470,6 +470,28 @@ const BRANCHES: BranchDef[] = [
   { id: "ai", label: "AI 활용", color: "var(--danger)", icon: "🤖" },
 ];
 
+function splitSkillName(name: string): string[] {
+  if (name.length <= 7) return [name];
+  const seps = [" ", "/", "-", "·", "+"];
+  const target = Math.ceil(name.length / 2);
+  let bestIdx = -1;
+  let bestDist = Infinity;
+  for (let i = 1; i < name.length - 1; i++) {
+    if (seps.includes(name[i])) {
+      const d = Math.abs(i - target);
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    }
+  }
+  if (bestIdx > 0) {
+    if (name[bestIdx] === " ") return [name.slice(0, bestIdx).trim(), name.slice(bestIdx + 1).trim()];
+    return [name.slice(0, bestIdx + 1).trim(), name.slice(bestIdx + 1).trim()];
+  }
+  return [name.slice(0, target), name.slice(target)];
+}
+
 function SkillTree({ tree }: { tree: SkillNode[] }) {
   const [hover, setHover] = useState<string | null>(null);
 
@@ -478,8 +500,8 @@ function SkillTree({ tree }: { tree: SkillNode[] }) {
     nodes: (tree || []).filter((n) => n.branch === b.id).sort((a, b) => a.tier - b.tier),
   }));
 
-  const COL = 240;
-  const ROW = 130;
+  const COL = 260;
+  const ROW = 175;
   const PAD_TOP = 60;
   const PAD_LEFT = 40;
   const W = PAD_LEFT * 2 + BRANCHES.length * COL;
@@ -554,10 +576,12 @@ function SkillTree({ tree }: { tree: SkillNode[] }) {
               if (pNIdx == null || pNIdx < 0) return null;
               const a = nodePos(pIdx, pNIdx);
               const b = nodePos(bIdx, nIdx);
+              const aR = 46 + (parent.tier === 1 ? 6 : 0);
+              const bR = 46 + (n.tier === 1 ? 6 : 0);
               return (
                 <path
                   key={`e${n.id}`}
-                  d={`M${a.x} ${a.y + 30} C ${a.x} ${a.y + 70} ${b.x} ${b.y - 50} ${b.x} ${b.y - 30}`}
+                  d={`M${a.x} ${a.y + aR + 2} C ${a.x} ${a.y + aR + 30} ${b.x} ${b.y - bR - 30} ${b.x} ${b.y - bR - 2}`}
                   stroke={g.color}
                   strokeWidth="2"
                   fill="none"
@@ -576,9 +600,14 @@ function SkillTree({ tree }: { tree: SkillNode[] }) {
             return items.map(({ g, bIdx, n, nIdx }) => {
               const { x, y } = nodePos(bIdx, nIdx);
               const isHover = hover === n.id;
-              const size = 56 + (n.tier === 1 ? 8 : 0);
-              const scale = isHover ? 1.5 : 1;
+              const size = 92 + (n.tier === 1 ? 12 : 0);
+              const scale = isHover ? 1.4 : 1;
               const haloR = (size / 2) * scale;
+              const lines = splitSkillName(n.name);
+              const longest = Math.max(...lines.map((l) => l.length));
+              const fontSize = longest <= 4 ? 15 : longest <= 6 ? 13 : longest <= 8 ? 12 : 11;
+              const lineGap = fontSize + 2;
+              const yStart = lines.length === 1 ? 5 : -((lines.length - 1) * lineGap) / 2 + 4;
               return (
                 <g key={n.id} className="node">
                   <g
@@ -589,29 +618,30 @@ function SkillTree({ tree }: { tree: SkillNode[] }) {
                   >
                     <Hexagon r={size / 2} fill={n.unlocked ? g.color : "var(--bg-2)"} stroke={g.color} strokeWidth="2.5" />
                     {n.tier === 1 && <Hexagon r={size / 2 + 8} fill="none" stroke={g.color} strokeWidth="1" opacity=".4" />}
-                    <circle cx={size / 2 - 6} cy={-size / 2 + 6} r="9" fill="var(--bg)" stroke={g.color} strokeWidth="1.5" />
+                    <circle cx={size / 2 - 8} cy={-size / 2 + 8} r="11" fill="var(--bg)" stroke={g.color} strokeWidth="1.5" />
                     <text
-                      x={size / 2 - 6}
-                      y={-size / 2 + 9.5}
+                      x={size / 2 - 8}
+                      y={-size / 2 + 12}
                       textAnchor="middle"
                       fill={g.color}
-                      style={{ fontSize: 10, fontWeight: 800, fontFamily: FONT_MONO }}
+                      style={{ fontSize: 11, fontWeight: 800, fontFamily: FONT_MONO }}
                     >
                       {n.tier}
                     </text>
                     <text
                       x="0"
-                      y="4"
+                      y={yStart}
                       textAnchor="middle"
                       fill={n.unlocked ? "var(--ink)" : g.color}
-                      style={{
-                        fontSize: isHover ? 9 : n.name.length > 7 ? 11 : 13,
-                        fontWeight: 800,
-                      }}
+                      style={{ fontSize, fontWeight: 800 }}
                     >
-                      {isHover || n.name.length <= 9 ? n.name : n.name.slice(0, 8) + "…"}
+                      {lines.map((line, i) => (
+                        <tspan key={i} x="0" dy={i === 0 ? 0 : lineGap}>
+                          {line}
+                        </tspan>
+                      ))}
                     </text>
-                    <g transform={`translate(${-size / 2 + 4} ${size / 2 + 14})`}>
+                    <g transform={`translate(${-size / 2 + 6} ${size / 2 + 14})`}>
                       {[0, 1, 2, 3, 4].map((i) => (
                         <rect
                           key={i}

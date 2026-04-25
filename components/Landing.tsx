@@ -19,9 +19,12 @@ export function Landing({ onSubmit }: LandingProps) {
   const [text, setText] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [shake, setShake] = useState(false);
+  const [keyShake, setKeyShake] = useState(false);
+  const [keyError, setKeyError] = useState(false);
   const [keyVisible, setKeyVisible] = useState(false);
   const [today, setToday] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const keyRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     taRef.current?.focus();
@@ -35,9 +38,16 @@ export function Landing({ onSubmit }: LandingProps) {
       setTimeout(() => setShake(false), 350);
       return;
     }
-    const trimmedKey = apiKey.trim();
-    sessionStorage.setItem("claudeApiKey", trimmedKey);
-    const mode: Mode = trimmedKey ? "real" : "mock";
+    if (!apiKey.trim()) {
+      setKeyShake(true);
+      setKeyError(true);
+      setTimeout(() => setKeyShake(false), 350);
+      keyRef.current?.focus();
+      return;
+    }
+    setKeyError(false);
+    sessionStorage.setItem("claudeApiKey", apiKey.trim());
+    const mode: Mode = "real";
     onSubmit(text.trim(), mode);
   };
 
@@ -137,27 +147,35 @@ export function Landing({ onSubmit }: LandingProps) {
           >
             Google AI Studio에서 발급받기 →
           </a>
-          <div style={{ position: "relative", maxWidth: 480 }}>
+          <div className={keyShake ? "shake" : ""} style={{ position: "relative", maxWidth: 480 }}>
             <input
+              ref={keyRef}
               type={keyVisible ? "text" : "password"}
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(e) => {
+                setApiKey(e.target.value);
+                if (e.target.value.trim()) setKeyError(false);
+              }}
               placeholder="Gemini API Key"
               className="mono"
               style={{
                 width: "100%",
                 height: 42,
                 padding: "0 40px 0 14px",
-                background: "rgba(245,239,224,.04)",
-                border: "1px solid var(--line)",
+                background: keyError ? "rgba(255,106,19,.06)" : "rgba(245,239,224,.04)",
+                border: `1px solid ${keyError ? "var(--danger)" : "var(--line)"}`,
                 borderRadius: 10,
                 color: "var(--paper)",
                 fontSize: 13,
                 outline: "none",
-                transition: "border-color .2s",
+                transition: "border-color .2s, background .2s",
               }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--warn)")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "var(--line)")}
+              onFocus={(e) =>
+                (e.currentTarget.style.borderColor = keyError ? "var(--danger)" : "var(--warn)")
+              }
+              onBlur={(e) =>
+                (e.currentTarget.style.borderColor = keyError ? "var(--danger)" : "var(--line)")
+              }
             />
             <button
               onClick={() => setKeyVisible((v) => !v)}
@@ -178,6 +196,20 @@ export function Landing({ onSubmit }: LandingProps) {
               {keyVisible ? "🙈" : "👁"}
             </button>
           </div>
+          {keyError && (
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 13,
+                color: "var(--danger)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              ⚠ 진단을 시작하려면 Gemini API 키가 필요합니다.
+            </div>
+          )}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 20, flexWrap: "wrap" }}>
