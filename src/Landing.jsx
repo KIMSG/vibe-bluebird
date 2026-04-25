@@ -95,13 +95,18 @@ function Landing({ onSubmit }){
 
         {/* Google API Key 입력 */}
         <div style={{marginTop:28}}>
-          <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:10}}>본인 보안을 위해 본인의 API 키를 사용합니다</div>
+          <div style={{fontSize:15, fontWeight:700, marginBottom:6}}>Gemini API 키를 입력하세요</div>
+          <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:6}}>키는 브라우저에만 임시 저장되며 서버로 전송되지 않습니다</div>
+          <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer"
+             style={{display:'inline-flex', alignItems:'center', gap:4, fontSize:13, color:'var(--warn)', textDecoration:'none', marginBottom:10, opacity:.85}}>
+            Google AI Studio에서 발급받기 →
+          </a>
           <div style={{position:'relative', maxWidth:480}}>
             <input
               type={keyVisible ? 'text' : 'password'}
               value={apiKey}
               onChange={e => setApiKey(e.target.value)}
-              placeholder="Google API Key"
+              placeholder="Gemini API Key"
               style={{
                 width:'100%', height:42, padding:'0 40px 0 14px',
                 background:'rgba(245,239,224,.04)', border:'1px solid var(--line)',
