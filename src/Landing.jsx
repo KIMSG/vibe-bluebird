@@ -1,18 +1,17 @@
-// 메인 랜딩 화면: 자연어 입력 + 예시 칩 + Mock/Real AI 토글
 const { useState, useRef, useEffect } = React;
 
 const EXAMPLES = [
-  '3년차 백엔드 개발자. Java/Spring 위주, 결제 시스템 담당. 최근 사내 AI 도입 TF 참여 중.',
-  'IT 회사 PM 5년차. PRD 작성, 우선순위 조율, 분기 OKR 관리가 주 업무. SQL은 가끔.',
-  '브랜드 마케터 2년차. 인스타 콘텐츠 기획, 카피라이팅, 인플루언서 협업.',
-  '대학교 4학년 컴공과. UX 디자이너로 취업 준비 중. 사이드 프로젝트 1개.',
-  '시각디자인과 졸업, 에이전시 그래픽 디자이너 4년. Figma/포토샵 능숙. 영상 편집은 초급.',
-  'CS팀 5년차. 티켓 응대 하루 80건. 매뉴얼 기반 응답이 70%.',
+  '데이터 분석가 4년차: SQL과 Python을 활용해 서비스 퍼널 분석과 A/B 테스트를 설계하며 데이터 기반의 비즈니스 인사이트를 도출합니다. 최근에는 사내 데이터 마트 구축과 유저 리텐션 개선을 위한 대시보드 시각화 작업에 집중하고 있습니다.',
+  'UX/UI 디자이너 6년차: 피그마를 활용해 전사 디자인 시스템을 관리하고 사용자 여정을 최적화하며 개발 효율을 높이는 핸드오프 업무를 수행합니다. 심미적 완성도를 넘어 비즈니스 지표를 개선하는 데이터 중심의 프로덕트 디자인에 주력하고 있습니다.',
+  '서비스 운영 매니저(CX) 4년차: 고객의 목소리를 정제해 유의미한 VOC를 기획팀에 전달하고 전반적인 서비스 운영 프로세스를 최적화합니다. 반복되는 문의를 줄이기 위해 챗봇 시나리오를 설계하고 운영 자동화 지표를 관리하는 역할을 맡고 있습니다.',
+  '컴공과 3학년 학생: Java와 Python 기반의 자료구조/알고리즘 및 운영체제 등 전공 심화 과정을 수강하며, 최근에는 개인 포트폴리오를 위해 React와 Node.js를 활용한 웹 프로젝트 협업에 참여 중입니다. 학점 관리와 동시에 다가올 하계 인턴십 지원을 위해 기술 면접 대비와 백준/프로그래머스 코딩 테스트 연습을 병행하고 있습니다.',
 ];
 
-function Landing({ onSubmit, mode, setMode }){
+function Landing({ onSubmit }){
   const [text, setText] = useState('');
+  const [apiKey, setApiKey] = useState(sessionStorage.getItem('claudeApiKey') || '');
   const [shake, setShake] = useState(false);
+  const [keyVisible, setKeyVisible] = useState(false);
   const taRef = useRef(null);
 
   useEffect(()=>{ taRef.current?.focus(); }, []);
@@ -23,7 +22,10 @@ function Landing({ onSubmit, mode, setMode }){
       setTimeout(()=>setShake(false), 350);
       return;
     }
-    onSubmit(text.trim());
+    const trimmedKey = apiKey.trim();
+    sessionStorage.setItem('claudeApiKey', trimmedKey);
+    const mode = trimmedKey ? 'real' : 'mock';
+    onSubmit(text.trim(), mode);
   };
 
   const onKey = (e) => {
@@ -33,6 +35,7 @@ function Landing({ onSubmit, mode, setMode }){
   return (
     <div style={{position:'relative', minHeight:'100vh', padding:'48px 24px 80px'}}>
       <div className="grid-bg" />
+
       {/* 상단 헤더 */}
       <div style={{position:'relative', zIndex:2, maxWidth:980, margin:'0 auto', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
         <div style={{display:'flex', alignItems:'center', gap:14}}>
@@ -41,9 +44,6 @@ function Landing({ onSubmit, mode, setMode }){
             <div className="mono" style={{fontSize:11, letterSpacing:'.2em', color:'var(--warn)', opacity:.8}}>SYSTEM // v1.0.0</div>
             <div style={{fontWeight:900, fontSize:18, letterSpacing:'-.01em'}}>AI 생존 진단기</div>
           </div>
-        </div>
-        <div style={{display:'flex', alignItems:'center', gap:10}}>
-          <ModeToggle mode={mode} setMode={setMode} />
         </div>
       </div>
 
@@ -54,31 +54,30 @@ function Landing({ onSubmit, mode, setMode }){
         </div>
 
         <h1 style={{fontSize:'clamp(44px, 6.5vw, 84px)', lineHeight:1, margin:'0 0 20px', letterSpacing:'-.035em', fontWeight:800}}>
-          AI가 당신을<br/>
-          대체할 확률은<br/>
-          <span style={{color:'var(--warn)'}}>몇 %</span>일까요?
+          AI 시대,<br/>
+          나의 커리어<br/>
+          <span style={{color:'var(--warn)'}}>경쟁력</span>은?
           <span className="cursor" style={{marginLeft:8, height:'.65em', display:'inline-block', verticalAlign:'baseline'}}></span>
         </h1>
         <p style={{fontSize:17, color:'var(--paper-2)', maxWidth:680, lineHeight:1.6, margin:'0 0 36px', opacity:.8}}>
-          직무·경력·하는 일을 자유롭게 입력해 주세요. AI가 생존 확률과 함께, 단련해야 할 스킬·당장 써야 할 도구를 알려드립니다.
+          생존 확률 분석부터 맞춤형 스킬 업까지
         </p>
 
         {/* 입력 영역 */}
         <div className={shake ? 'shake' : ''} style={{position:'relative'}}>
           <div style={{position:'absolute', top:-12, left:24, padding:'0 10px', background:'var(--bg)', zIndex:2}}>
-            <span className="mono" style={{fontSize:11, letterSpacing:'.15em', color:'var(--warn)'}}>// INPUT.txt</span>
+            <span className="mono" style={{fontSize:11, letterSpacing:'.15em', color:'var(--warn)'}}>// 현재의 직무나 전공을 알려주세요</span>
           </div>
           <textarea
             ref={taRef}
             className="diag"
-            placeholder={`예) 3년차 백엔드 개발자입니다. 결제 시스템 담당이고, Cursor를 매일 씁니다.\n예) 마케팅 5년차. 인스타 콘텐츠 + 퍼포먼스 광고 운영 중.\n예) 컴공과 4학년. 프론트엔드 취업 준비 중. 사이드 프로젝트 1개.`}
+            placeholder={`예) 데이터 분석가 4년차입니다. SQL과 Python으로 퍼널 분석과 A/B 테스트를 설계합니다.\n예) UX/UI 디자이너 6년차. 피그마로 전사 디자인 시스템을 관리하고 있습니다.\n예) 컴공과 3학년. React/Node.js 웹 프로젝트 협업 중, 하계 인턴십 준비 중입니다.`}
             value={text}
             onChange={(e)=>setText(e.target.value)}
             onKeyDown={onKey}
           />
           <div style={{display:'flex', justifyContent:'space-between', marginTop:10, padding:'0 4px', fontSize:12, color:'var(--paper-2)', opacity:.6}}>
             <span className="mono">{text.length} chars · 최소 10자</span>
-            <span className="mono">⌘+Enter 로 진단</span>
           </div>
         </div>
 
@@ -94,15 +93,41 @@ function Landing({ onSubmit, mode, setMode }){
           </div>
         </div>
 
+        {/* Google API Key 입력 */}
+        <div style={{marginTop:28}}>
+          <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:10}}>본인 보안을 위해 본인의 API 키를 사용합니다</div>
+          <div style={{position:'relative', maxWidth:480}}>
+            <input
+              type={keyVisible ? 'text' : 'password'}
+              value={apiKey}
+              onChange={e => setApiKey(e.target.value)}
+              placeholder="Google API Key"
+              style={{
+                width:'100%', height:42, padding:'0 40px 0 14px',
+                background:'rgba(245,239,224,.04)', border:'1px solid var(--line)',
+                borderRadius:10, color:'var(--paper)', fontFamily:'JetBrains Mono, monospace',
+                fontSize:13, outline:'none', transition:'border-color .2s',
+              }}
+              onFocus={e => e.target.style.borderColor='var(--warn)'}
+              onBlur={e => e.target.style.borderColor='var(--line)'}
+            />
+            <button
+              onClick={()=>setKeyVisible(v=>!v)}
+              style={{
+                position:'absolute', right:10, top:'50%', transform:'translateY(-50%)',
+                background:'none', border:'none', cursor:'pointer',
+                color:'var(--paper-2)', fontSize:15, padding:0, lineHeight:1,
+              }}
+            >{keyVisible ? '🙈' : '👁'}</button>
+          </div>
+        </div>
+
         {/* CTA */}
-        <div style={{display:'flex', alignItems:'center', gap:14, marginTop:32, flexWrap:'wrap'}}>
+        <div style={{display:'flex', alignItems:'center', gap:14, marginTop:20, flexWrap:'wrap'}}>
           <button className="btn danger" onClick={submit} style={{fontSize:15, padding:'15px 26px'}}>
             진단 시작
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{marginLeft:2}}><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
-          <span style={{fontSize:13, color:'var(--paper-2)', opacity:.55}}>
-            {mode === 'real' ? 'Real AI (Claude) · 5~15초' : 'Mock 모드 · 4초'}
-          </span>
         </div>
       </div>
     </div>
@@ -116,25 +141,6 @@ function Logo(){
       <path d="M8 24 L14 24 L17 16 L23 32 L26 22 L30 22 L32 26 L36 26" stroke="var(--ink)" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
       <circle cx="36" cy="26" r="2" fill="var(--danger-2)"/>
     </svg>
-  );
-}
-
-function ModeToggle({ mode, setMode }){
-  return (
-    <div style={{display:'inline-flex', padding:4, borderRadius:999, border:'1px solid var(--line)', background:'rgba(0,0,0,.3)'}}>
-      <button onClick={()=>setMode('mock')} className="mono" style={{
-        padding:'8px 14px', borderRadius:999, border:0, cursor:'pointer',
-        background: mode==='mock' ? 'var(--warn)' : 'transparent',
-        color: mode==='mock' ? 'var(--ink)' : 'var(--paper-2)',
-        fontWeight: mode==='mock' ? 800 : 500, fontSize:12, letterSpacing:'.05em',
-      }}>MOCK</button>
-      <button onClick={()=>setMode('real')} className="mono" style={{
-        padding:'8px 14px', borderRadius:999, border:0, cursor:'pointer',
-        background: mode==='real' ? 'var(--danger)' : 'transparent',
-        color: mode==='real' ? '#fff' : 'var(--paper-2)',
-        fontWeight: mode==='real' ? 800 : 500, fontSize:12, letterSpacing:'.05em',
-      }}>REAL · CLAUDE</button>
-    </div>
   );
 }
 
