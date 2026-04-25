@@ -66,7 +66,7 @@ function Landing({ onSubmit }){
         {/* 입력 영역 */}
         <div className={shake ? 'shake' : ''} style={{position:'relative'}}>
           <div style={{position:'absolute', top:-12, left:24, padding:'0 10px', background:'var(--bg)', zIndex:2}}>
-            <span className="mono" style={{fontSize:11, letterSpacing:'.15em', color:'var(--warn)'}}>// 현재의 직무나 전공을 알려주세요</span>
+            <span className="mono" style={{fontSize:14, letterSpacing:'.1em', color:'var(--warn)'}}>// 현재의 직무나 전공을 알려주세요</span>
           </div>
           <textarea
             ref={taRef}
@@ -95,7 +95,7 @@ function Landing({ onSubmit }){
 
         {/* Google API Key 입력 */}
         <div style={{marginTop:28}}>
-          <div style={{fontSize:15, fontWeight:700, marginBottom:6}}>Gemini API 키를 입력하세요</div>
+          <div style={{fontSize:14, color:'var(--warn)', marginBottom:6, letterSpacing:'.1em'}} className="mono">// Gemini API 키를 입력하세요</div>
           <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:6}}>키는 브라우저에만 임시 저장되며 서버로 전송되지 않습니다</div>
           <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer"
              style={{display:'inline-flex', alignItems:'center', gap:4, fontSize:13, color:'var(--warn)', textDecoration:'none', marginBottom:10, opacity:.85}}>
