@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import type {
   DiagnosisResult,
   Mode,
@@ -247,12 +248,133 @@ function buildPlaybook(verdict: Verdict): PlaybookItem[] {
   return common;
 }
 
-export async function diagnose(text: string, mode: Mode): Promise<DiagnosisResult> {
-  if (mode === "real") {
-    // Real Claude 연동은 추후 API route(/api/diagnose)로 이식 예정.
-    // 지금은 mock으로 폴백.
-    await new Promise((r) => setTimeout(r, 800));
-    return { ...mockDiagnose(text), _fallback: true, _error: "Real AI 미구현 (mock 폴백)" };
+const GEMINI_MODEL = "gemini-2.5-flash";
+
+const SYSTEM_INSTRUCTION = `당신은 "AI 생존 진단기"입니다. 입력된 직무/전공/업무 설명을 분석해 AI 시대의 생존 가능성을 진단하고, 정해진 JSON 스키마로 결과를 출력합니다.
+
+[톤]
+- 시니컬하면서 따뜻한 한국어. 가벼운 풍자/위트 OK.
+- 이모지는 verdict 또는 tagline 정도에서만, 과하지 않게.
+- "AI가 대체한다"는 위협이 아니라 "어떻게 살아남고 더 강해질지"를 알려주는 관점.
+
+[필드 규칙]
+- percent: 0~100 정수. AI 대체 가능성 %.
+- verdict: percent 기준으로 "치명"(80+) / "위험"(65~79) / "위태"(45~64) / "생존"(0~44) 중 하나. 반드시 percent와 일치.
+- tagline: 한 줄 카피, 50자 이내, 시니컬한 톤. 이모지 1개 이하.
+- role: 입력에서 추정한 직무명(한국어). 예: "개발자", "디자이너", "기획자/PM", "마케터", "학생/취준생" 등. 모르면 "제너럴리스트".
+- stats: { tech, human, creative, judgment } 각 0~100 정수. 직무 특성에 맞게 분배.
+- diagnosis: 진단 코멘트 정확히 3개. 각 40~120자. 구체적이고 의외성 있게.
+- skillTree: 정확히 9개 노드. 3개 분기(branch=core|human|ai). 각 분기마다 tier 1, 2, 3 노드를 정확히 1개씩.
+  · tier 1 노드는 unlocked: true. tier 2/3은 같은 branch의 직전 tier 노드 id를 parent로 지정.
+  · id는 branch 첫 글자 + tier 번호 (c1, c2, c3, h1, h2, h3, a1, a2, a3). 일관되게.
+  · urgency 1~5.
+  · name 12자 이내, desc 40자 이내. 직무 맥락 반영.
+- tools: 5~7개. 직무에 실제 유용한 AI 도구. category, why(40자 이내), urgency 1~5.
+- playbook: 정확히 4개 항목. when은 "오늘", "1주일", "1개월", "3개월" 순서로 1개씩. action은 60~120자, 즉시 실행 가능한 구체적 행동.
+
+JSON 외에는 어떤 텍스트도 출력하지 마세요.`;
+
+const responseSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    percent: { type: SchemaType.INTEGER },
+    verdict: { type: SchemaType.STRING, enum: ["치명", "위험", "위태", "생존"] },
+    tagline: { type: SchemaType.STRING },
+    role: { type: SchemaType.STRING },
+    stats: {
+      type: SchemaType.OBJECT,
+      properties: {
+        tech: { type: SchemaType.INTEGER },
+        human: { type: SchemaType.INTEGER },
+        creative: { type: SchemaType.INTEGER },
+        judgment: { type: SchemaType.INTEGER },
+      },
+      required: ["tech", "human", "creative", "judgment"],
+    },
+    diagnosis: {
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
+    },
+    skillTree: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          id: { type: SchemaType.STRING },
+          branch: { type: SchemaType.STRING, enum: ["core", "human", "ai"] },
+          tier: { type: SchemaType.INTEGER },
+          name: { type: SchemaType.STRING },
+          desc: { type: SchemaType.STRING },
+          urgency: { type: SchemaType.INTEGER },
+          unlocked: { type: SchemaType.BOOLEAN },
+          parent: { type: SchemaType.STRING },
+        },
+        required: ["id", "branch", "tier", "name", "desc", "urgency"],
+      },
+    },
+    tools: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          name: { type: SchemaType.STRING },
+          category: { type: SchemaType.STRING },
+          why: { type: SchemaType.STRING },
+          urgency: { type: SchemaType.INTEGER },
+        },
+        required: ["name", "category", "why", "urgency"],
+      },
+    },
+    playbook: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          when: { type: SchemaType.STRING, enum: ["오늘", "1주일", "1개월", "3개월"] },
+          action: { type: SchemaType.STRING },
+        },
+        required: ["when", "action"],
+      },
+    },
+  },
+  required: ["percent", "verdict", "tagline", "role", "stats", "diagnosis", "skillTree", "tools", "playbook"],
+};
+
+async function geminiDiagnose(text: string, apiKey: string): Promise<DiagnosisResult> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: GEMINI_MODEL,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    generationConfig: {
+      responseMimeType: "application/json",
+      // @ts-expect-error SDK 타입에 SchemaType 트리가 일부 누락
+      responseSchema,
+      temperature: 0.85,
+    },
+  });
+
+  const result = await model.generateContent(text);
+  const raw = result.response.text();
+  const parsed = JSON.parse(raw) as DiagnosisResult;
+
+  parsed.percent = Math.max(0, Math.min(100, Math.round(parsed.percent)));
+  parsed.verdict =
+    parsed.percent >= 80 ? "치명" :
+    parsed.percent >= 65 ? "위험" :
+    parsed.percent >= 45 ? "위태" : "생존";
+
+  return parsed;
+}
+
+export async function diagnose(text: string, mode: Mode, apiKey?: string): Promise<DiagnosisResult> {
+  if (mode === "real" && apiKey) {
+    try {
+      return await geminiDiagnose(text, apiKey);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Gemini 호출 실패";
+      await new Promise((r) => setTimeout(r, 600));
+      return { ...mockDiagnose(text), _fallback: true, _error: msg };
+    }
   }
   await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
   return mockDiagnose(text);

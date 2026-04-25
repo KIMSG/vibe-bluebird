@@ -468,7 +468,6 @@ const BRANCHES: BranchDef[] = [
   { id: "core", label: "직무 코어", color: "var(--warn)", icon: "⚔️" },
   { id: "human", label: "인간력", color: "var(--safe)", icon: "🤝" },
   { id: "ai", label: "AI 활용", color: "var(--danger)", icon: "🤖" },
-  { id: "meta", label: "메타", color: "var(--paper-2)", icon: "🧠" },
 ];
 
 function SkillTree({ tree }: { tree: SkillNode[] }) {
@@ -569,59 +568,69 @@ function SkillTree({ tree }: { tree: SkillNode[] }) {
             }),
           )}
 
-          {grouped.map((g, bIdx) =>
-            g.nodes.map((n, nIdx) => {
+          {(() => {
+            const items = grouped.flatMap((g, bIdx) =>
+              g.nodes.map((n, nIdx) => ({ g, bIdx, n, nIdx })),
+            );
+            items.sort((a, b) => Number(a.n.id === hover) - Number(b.n.id === hover));
+            return items.map(({ g, bIdx, n, nIdx }) => {
               const { x, y } = nodePos(bIdx, nIdx);
               const isHover = hover === n.id;
               const size = 56 + (n.tier === 1 ? 8 : 0);
+              const scale = isHover ? 1.5 : 1;
+              const haloR = (size / 2) * scale;
               return (
-                <g
-                  key={n.id}
-                  className="node"
-                  transform={`translate(${x} ${y})`}
-                  onMouseEnter={() => setHover(n.id)}
-                  onMouseLeave={() => setHover(null)}
-                >
-                  <Hexagon r={size / 2} fill={n.unlocked ? g.color : "transparent"} stroke={g.color} strokeWidth="2.5" />
-                  {n.tier === 1 && <Hexagon r={size / 2 + 8} fill="none" stroke={g.color} strokeWidth="1" opacity=".4" />}
-                  <circle cx={size / 2 - 6} cy={-size / 2 + 6} r="9" fill="var(--bg)" stroke={g.color} strokeWidth="1.5" />
-                  <text
-                    x={size / 2 - 6}
-                    y={-size / 2 + 9.5}
-                    textAnchor="middle"
-                    fill={g.color}
-                    style={{ fontSize: 10, fontWeight: 800, fontFamily: FONT_MONO }}
+                <g key={n.id} className="node">
+                  <g
+                    transform={`translate(${x} ${y}) scale(${scale})`}
+                    onMouseEnter={() => setHover(n.id)}
+                    onMouseLeave={() => setHover(null)}
+                    style={{ cursor: "pointer", transition: "transform 180ms ease-out" }}
                   >
-                    {n.tier}
-                  </text>
-                  <text
-                    x="0"
-                    y="4"
-                    textAnchor="middle"
-                    fill={n.unlocked ? "var(--ink)" : g.color}
-                    style={{ fontSize: n.name.length > 7 ? 11 : 13, fontWeight: 800 }}
-                  >
-                    {n.name.length > 9 ? n.name.slice(0, 8) + "…" : n.name}
-                  </text>
-                  <g transform={`translate(${-size / 2 + 4} ${size / 2 + 14})`}>
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <rect
-                        key={i}
-                        x={i * 8}
-                        y="0"
-                        width="6"
-                        height="6"
-                        rx="1"
-                        fill={i < n.urgency ? g.color : "rgba(255,255,255,.1)"}
-                      />
-                    ))}
+                    <Hexagon r={size / 2} fill={n.unlocked ? g.color : "var(--bg-2)"} stroke={g.color} strokeWidth="2.5" />
+                    {n.tier === 1 && <Hexagon r={size / 2 + 8} fill="none" stroke={g.color} strokeWidth="1" opacity=".4" />}
+                    <circle cx={size / 2 - 6} cy={-size / 2 + 6} r="9" fill="var(--bg)" stroke={g.color} strokeWidth="1.5" />
+                    <text
+                      x={size / 2 - 6}
+                      y={-size / 2 + 9.5}
+                      textAnchor="middle"
+                      fill={g.color}
+                      style={{ fontSize: 10, fontWeight: 800, fontFamily: FONT_MONO }}
+                    >
+                      {n.tier}
+                    </text>
+                    <text
+                      x="0"
+                      y="4"
+                      textAnchor="middle"
+                      fill={n.unlocked ? "var(--ink)" : g.color}
+                      style={{
+                        fontSize: isHover ? 9 : n.name.length > 7 ? 11 : 13,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {isHover || n.name.length <= 9 ? n.name : n.name.slice(0, 8) + "…"}
+                    </text>
+                    <g transform={`translate(${-size / 2 + 4} ${size / 2 + 14})`}>
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <rect
+                          key={i}
+                          x={i * 8}
+                          y="0"
+                          width="6"
+                          height="6"
+                          rx="1"
+                          fill={i < n.urgency ? g.color : "rgba(255,255,255,.1)"}
+                        />
+                      ))}
+                    </g>
                   </g>
 
                   {isHover && (
-                    <g transform="translate(0 0)" style={{ pointerEvents: "none" }}>
+                    <g transform={`translate(${x} ${y})`} style={{ pointerEvents: "none" }}>
                       <rect
                         x={-110}
-                        y={size / 2 + 28}
+                        y={haloR + 18}
                         width="220"
                         height="56"
                         rx="8"
@@ -631,14 +640,14 @@ function SkillTree({ tree }: { tree: SkillNode[] }) {
                       />
                       <text
                         x="0"
-                        y={size / 2 + 48}
+                        y={haloR + 38}
                         textAnchor="middle"
                         fill="var(--paper)"
                         style={{ fontSize: 12, fontWeight: 700 }}
                       >
                         {n.name}
                       </text>
-                      <foreignObject x={-100} y={size / 2 + 54} width="200" height="28">
+                      <foreignObject x={-100} y={haloR + 44} width="200" height="28">
                         <div
                           style={{ fontSize: 11, color: "#fde58aaa", textAlign: "center", lineHeight: 1.4 }}
                         >
@@ -649,8 +658,8 @@ function SkillTree({ tree }: { tree: SkillNode[] }) {
                   )}
                 </g>
               );
-            }),
-          )}
+            });
+          })()}
         </svg>
       </div>
       <div

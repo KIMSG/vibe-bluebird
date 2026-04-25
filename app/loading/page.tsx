@@ -15,6 +15,7 @@ export default function LoadingPage() {
   useEffect(() => {
     const text = sessionStorage.getItem("diagInput") || "";
     const m = (sessionStorage.getItem("diagMode") as Mode) || "mock";
+    const apiKey = sessionStorage.getItem("claudeApiKey") || "";
 
     if (!text) {
       router.replace("/");
@@ -25,7 +26,7 @@ export default function LoadingPage() {
     setMode(m);
     setReady(true);
 
-    diagnose(text, m).then((result) => {
+    diagnose(text, m, apiKey).then((result) => {
       sessionStorage.setItem("diagResult", JSON.stringify(result));
       router.replace("/result");
     });
