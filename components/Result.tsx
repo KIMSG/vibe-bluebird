@@ -87,7 +87,7 @@ export function Result({ result, inputText, mode, onRestart }: ResultProps) {
           }}
         >
           <b style={{ color: "var(--warn)" }}>📌 진단의 한계</b> · 이 결과는{" "}
-          {mode === "real" ? "Claude의 실제 분석" : "mock 휴리스틱"}을 기반으로 합니다. 정확한 직무 미래는 누구도 모릅니다. 이 진단을 받았다는 사실 자체가 이미 평균보다 앞서있다는 뜻입니다 — 대부분 사람은 안 찾아봅니다.
+          {mode === "real" ? "Gemini 2.5 Flash의 실제 분석" : "mock 휴리스틱"}을 기반으로 합니다. 정확한 직무 미래는 누구도 모릅니다. 이 진단을 받았다는 사실 자체가 이미 평균보다 앞서있다는 뜻입니다 — 대부분 사람은 안 찾아봅니다.
           {result._fallback && (
             <div style={{ marginTop: 8, color: "var(--danger-2)" }}>
               ⚠ Real AI 호출 실패로 mock 진단으로 대체되었습니다.

@@ -208,7 +208,7 @@ function ConsoleLog({ inputText, mode }: { inputText: string; mode: Mode }) {
 
   useEffect(() => {
     const messages = [
-      `> ${mode === "real" ? "claude.complete()" : "mock.diagnose()"} initiated`,
+      `> ${mode === "real" ? "gemini.generateContent()" : "mock.diagnose()"} initiated`,
       `> input.length = ${inputText.length} chars`,
       `> tokenizing...`,
       `> matched 'role' patterns: scanning`,
@@ -221,7 +221,7 @@ function ConsoleLog({ inputText, mode }: { inputText: string; mode: Mode }) {
       `> ranking top 7`,
       `> drafting verdict`,
       `> formatting report`,
-      mode === "real" ? `> awaiting claude response...` : `> mock latency: 4200ms`,
+      mode === "real" ? `> awaiting gemini response...` : `> mock latency: 4200ms`,
     ];
     let i = 0;
     const id = setInterval(() => {
