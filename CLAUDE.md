@@ -13,3 +13,8 @@
   1. `git push origin main` — 본인 fork(KIMSG)에 푸시
   2. `git push upstream main` — 원본(yha992)에 푸시
 - 한쪽이라도 푸시에 실패하면 즉시 사용자에게 보고합니다.
+
+## 배포 (Vercel)
+- Vercel 프로젝트는 **반드시 `KIMSG/vibe-bluebird`(origin)에만 연결**합니다. `yha992/vibe-bluebird`(upstream)에 직접 연결하면 안 됩니다.
+- 배포 트리거는 KIMSG 레포로의 push에서만 발생합니다.
+- 배포 관련 문제(404, 빌드 안 됨 등)가 발생하면 가장 먼저 Vercel 프로젝트의 Git 연결이 KIMSG를 가리키는지 확인합니다.
