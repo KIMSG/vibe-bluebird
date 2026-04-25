@@ -2,9 +2,9 @@
 
 🔗 **[https://vibe-bluebird.vercel.app](https://vibe-bluebird.vercel.app)**
 
-![랜딩 페이지](assets/screenshot-landing2.png)
+![랜딩 페이지](assets/screenshot-landing1.png)
 
-![결과 페이지](assets/screenshot-landing1.png)
+![결과 페이지](assets/screenshot-landing2.png)
 
 > **"AI가 당신을 대체할 확률은 몇 %일까요?"**  
 > 직무와 경력을 자연어로 입력하면, Gemini AI가 대체 가능성과 맞춤형 생존 전략을 즉시 분석해드립니다.
@@ -77,6 +77,16 @@ AI 생존 진단기는 자연어 입력 하나로 **나에게 맞는 답을 30�
 | **AI** | Gemini API |
 | **스타일** | CSS Variables + 인라인 스타일 |
 | **번들러** | Babel Standalone (브라우저 직접 트랜스파일) |
+
+---
+
+## To-Do
+
+- [ ] 스킬 트리 항목에 학습 리소스 링크 연결
+- [ ] 결과 페이지 PDF 다운로드 기능
+- [ ] 서비스 배포 (Vercel / GitHub Pages)
+- [ ] 실행 플레이북 리마인더 및 체크리스트 기능
+- [ ] **수익화 모델** — 맞춤형 진단 결과에 연계한 AI 툴 · 교육 플랫폼 제휴 (Affiliate, B2B 스폰서십)
 
 ---
 
