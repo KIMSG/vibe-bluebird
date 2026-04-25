@@ -9,7 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gothic+A1:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
   :root{
-    /* 클린 다크 + 앰버 액센트 */
     --bg:        #14110b;
     --bg-2:      #1c1810;
     --paper:     #f5efe0;
@@ -27,17 +26,12 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--paper);font-family:'Gothic A1', system-ui, sans-serif;}
-  body{
-    min-height:100vh;
-    background: var(--bg);
-    overflow-x:hidden;
-  }
+  body{ min-height:100vh; background: var(--bg); overflow-x:hidden; }
   #app{min-height:100vh;}
   .mono{font-family:'JetBrains Mono', ui-monospace, monospace;}
   .hand{font-family:'Gaegu', cursive;}
   ::selection{background:var(--warn);color:var(--ink);}
 
-  /* 노이즈 삭제 (클린하게) */
   .grid-bg{
     position:absolute; inset:0; pointer-events:none;
     background-image:
@@ -48,7 +42,6 @@
     -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 85%);
   }
 
-  /* 공통 버튼 */
   .btn{
     display:inline-flex; align-items:center; gap:10px;
     padding:13px 22px; border-radius:10px;
@@ -65,7 +58,6 @@
   .btn.ghost:hover{ background:rgba(245,239,224,.06); border-color:var(--paper-2);}
   .btn[disabled]{opacity:.4; cursor:not-allowed;}
 
-  /* 스탬프 */
   .stamp{
     display:inline-flex; align-items:center; gap:8px;
     padding:6px 14px; border-radius:4px;
@@ -74,7 +66,6 @@
     transform: rotate(-3deg);
   }
 
-  /* 위험 줄무늬 */
   .hazard{
     background: repeating-linear-gradient(45deg, #1a1308 0 14px, var(--warn) 14px 28px);
   }
@@ -90,11 +81,9 @@
     100% { transform: translateY(100%); }
   }
 
-  /* RPG 스킬트리 */
   .node{ transition: filter .15s, transform .15s; cursor:pointer; }
   .node:hover{ filter: brightness(1.15); transform: scale(1.04); }
 
-  /* 입력 영역 */
   textarea.diag{
     width:100%; min-height:200px;
     background:rgba(245,239,224,.03);
@@ -118,7 +107,6 @@
   }
   .chip:hover{ background:rgba(255,180,0,.12); border-style:solid; border-color:var(--warn); color:var(--warn-2); }
 
-  /* 라벨 */
   .label-tag{
     display:inline-flex; align-items:center; gap:6px;
     padding:4px 10px; border:1px solid var(--warn); border-radius:4px;
@@ -126,7 +114,6 @@
     color:var(--warn); text-transform:uppercase;
   }
 
-  /* 결과 카드 공통 */
   .panel{
     background:rgba(245,239,224,.025);
     border:1px solid var(--line);
@@ -135,7 +122,6 @@
   }
   .panel.paper{ background:var(--paper); color:var(--ink); border-color:var(--ink); }
 
-  /* 스크롤바 */
   ::-webkit-scrollbar{ width:10px; height:10px; }
   ::-webkit-scrollbar-track{ background: transparent;}
   ::-webkit-scrollbar-thumb{ background: rgba(255,180,0,.25); border-radius:10px;}
@@ -150,10 +136,17 @@
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
 <script type="text/babel" src="tweaks-panel.jsx"></script>
-<script type="text/babel" src="src/diagnose.jsx"></script>
 <script type="text/babel" src="src/Landing.jsx"></script>
-<script type="text/babel" src="src/Loading.jsx"></script>
-<script type="text/babel" src="src/Result.jsx"></script>
-<script type="text/babel" src="src/App.jsx"></script>
+<script type="text/babel">
+  function LandingPage() {
+    const onSubmit = (text) => {
+      sessionStorage.setItem('diagInput', text);
+      sessionStorage.setItem('diagMode', 'mock');
+      window.location.href = 'loading.html';
+    };
+    return <window.Landing onSubmit={onSubmit} mode="mock" setMode={() => {}} />;
+  }
+  ReactDOM.createRoot(document.getElementById('app')).render(<LandingPage />);
+</script>
 </body>
 </html>
