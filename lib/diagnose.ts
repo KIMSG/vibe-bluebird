@@ -368,13 +368,7 @@ async function geminiDiagnose(text: string, apiKey: string): Promise<DiagnosisRe
 
 export async function diagnose(text: string, mode: Mode, apiKey?: string): Promise<DiagnosisResult> {
   if (mode === "real" && apiKey) {
-    try {
-      return await geminiDiagnose(text, apiKey);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Gemini 호출 실패";
-      await new Promise((r) => setTimeout(r, 600));
-      return { ...mockDiagnose(text), _fallback: true, _error: msg };
-    }
+    return await geminiDiagnose(text, apiKey);
   }
   await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
   return mockDiagnose(text);

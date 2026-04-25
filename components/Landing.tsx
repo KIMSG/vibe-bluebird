@@ -23,6 +23,7 @@ export function Landing({ onSubmit }: LandingProps) {
   const [keyError, setKeyError] = useState(false);
   const [keyVisible, setKeyVisible] = useState(false);
   const [today, setToday] = useState("");
+  const [diagError, setDiagError] = useState<string | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const keyRef = useRef<HTMLInputElement>(null);
 
@@ -30,6 +31,13 @@ export function Landing({ onSubmit }: LandingProps) {
     taRef.current?.focus();
     setToday(new Date().toISOString().slice(0, 10).replace(/-/g, "."));
     setApiKey(sessionStorage.getItem("claudeApiKey") || "");
+    const err = sessionStorage.getItem("diagError");
+    if (err) {
+      setDiagError(err);
+      setText(sessionStorage.getItem("diagInput") || "");
+      setKeyError(true);
+      sessionStorage.removeItem("diagError");
+    }
   }, []);
 
   const submit = () => {
@@ -154,7 +162,10 @@ export function Landing({ onSubmit }: LandingProps) {
               value={apiKey}
               onChange={(e) => {
                 setApiKey(e.target.value);
-                if (e.target.value.trim()) setKeyError(false);
+                if (e.target.value.trim()) {
+                  setKeyError(false);
+                  setDiagError(null);
+                }
               }}
               placeholder="Gemini API Key"
               className="mono"
@@ -208,6 +219,25 @@ export function Landing({ onSubmit }: LandingProps) {
               }}
             >
               ⚠ 진단을 시작하려면 Gemini API 키가 필요합니다.
+            </div>
+          )}
+          {diagError && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: "10px 14px",
+                fontSize: 13,
+                color: "var(--danger)",
+                background: "rgba(255,106,19,.08)",
+                border: "1px solid var(--danger)",
+                borderRadius: 8,
+                lineHeight: 1.5,
+              }}
+            >
+              ⚠ 진단 호출 실패: API 키가 유효하지 않거나 네트워크 오류가 발생했습니다.
+              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.7, fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                {diagError}
+              </div>
             </div>
           )}
         </div>

@@ -26,10 +26,17 @@ export default function LoadingPage() {
     setMode(m);
     setReady(true);
 
-    diagnose(text, m, apiKey).then((result) => {
-      sessionStorage.setItem("diagResult", JSON.stringify(result));
-      router.replace("/result");
-    });
+    diagnose(text, m, apiKey)
+      .then((result) => {
+        sessionStorage.setItem("diagResult", JSON.stringify(result));
+        sessionStorage.removeItem("diagError");
+        router.replace("/result");
+      })
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : "진단 중 오류가 발생했습니다.";
+        sessionStorage.setItem("diagError", msg);
+        router.replace("/");
+      });
   }, [router]);
 
   if (!ready) return null;
