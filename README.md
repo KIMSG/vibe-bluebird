@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔴 AI 생존 진단기
 
-## Getting Started
+> **"AI가 내 일자리를 빼앗을까?"**  
+> 직무·이력을 자연어로 입력하면 AI 대체 가능성과 생존 전략을 즉시 출력하는 웹앱
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🎯 프로젝트 개요
+
+2026년 4월, AI 에이전트 확산과 대기업 구조조정 이슈로 **"내 일자리 괜찮나?"** 불안이 최고조.  
+그런데 막연한 불안을 **구체적 행동**으로 바꿔주는 도구가 없다.
+
+**AI 생존 진단기**는 이 문제를 푼다.
+
+| | |
+|---|---|
+| **타겟** | AI가 뭔지는 알지만 나한테 어떤 영향인지 모르는 2030 직장인·취준생 |
+| **핵심 가치** | 막연한 공포 → 오늘 당장 할 수 있는 행동으로 |
+| **형태** | 설치 없이 브라우저에서 바로 실행되는 웹앱 |
+
+---
+
+## 📱 화면 구성
+
+```
+[메인] 자연어 입력 → [로딩] 스캐닝 애니메이션 → [결과] 진단 카드
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Scene 1 — 메인 입력
+- 자연어로 내 정보 입력 (직무, 이력, 희망사항 등)
+- 직군 칩 태그로 예시 문장 자동 완성
+- 예시: *"저는 5년차 마케터입니다. 주로 SNS 콘텐츠 기획과 광고 운영을 해요"*
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Scene 2 — 로딩
+- 스캐닝 모션 애니메이션
+- "직무 분석 중..." → "AI 위협 지수 계산 중..." → "생존 전략 수립 중..."
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Scene 3 — 결과
+- 🔴 **AI 대체 가능성 nn%** (0~100%, 게이지 시각화)
+- 🛠 **살아남는 스킬 로드맵** (1개월 → 3개월 → 6개월 단계별)
+- 🤖 **지금 당장 써야 할 AI 도구 추천** (직무 맞춤)
+- 📤 결과 카드 공유 (이미지 저장 / 링크 복사)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🗂 파일 구조
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+├── index.html            # 진입점, 전역 스타일 & 디자인 토큰
+├── tweaks-panel.jsx      # 개발용 디버그 패널
+└── src/
+    ├── App.jsx           # Scene 라우터 (landing → loading → result)
+    ├── Landing.jsx       # 입력 UI (textarea + 직군 칩)
+    ├── Loading.jsx       # 분석 중 애니메이션
+    ├── Result.jsx        # 결과 카드 (위험도 게이지, 스킬트리, 도구 추천)
+    └── diagnose.jsx      # Claude API 호출 & 응답 파싱
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🎨 디자인 시스템
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**컨셉:** 위협적이지만 유머러스한 경고 감성 (노랑 + 주황 베이스)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `--bg` | `#1a1308` | 배경 (짙은 갈색-검정) |
+| `--warn` | `#ffb400` | 포인트 (경고 노랑) |
+| `--danger` | `#ff6a13` | 위험 (주황) |
+| `--crit` | `#e60000` | 임계 (빨강) |
+| `--safe` | `#6cd05e` | 안전 (초록) |
+
+**폰트:**
+- `Gothic A1` — 본문
+- `JetBrains Mono` — 수치·코드
+- `Gaegu` — 손글씨 포인트
+
+---
+
+## ⚙️ 기술 스택
+
+| | |
+|---|---|
+| **프레임워크** | React 18 (CDN, 빌드 없음) |
+| **번들러** | Babel Standalone (브라우저 직접 트랜스파일) |
+| **AI** | Claude API (`diagnose.jsx`) |
+| **스타일** | CSS Variables + 인라인 스타일 |
+
+---
+
+## 🚀 로컬 실행
+
+빌드 과정 없이 정적 파일 서버만 있으면 됩니다.
+
+```bash
+# 방법 1 — Python
+python -m http.server 8080
+
+# 방법 2 — Node.js
+npx serve .
+
+# 방법 3 — VS Code
+# Live Server 익스텐션으로 index.html 열기
+```
+
+---
+
+## 🤝 분업 가이드
+
+| 담당 영역 | 파일 | 주요 작업 |
+|---|---|---|
+| **UI / 디자인** | `Landing.jsx`, `Loading.jsx`, `Result.jsx` | 화면 구성 및 애니메이션 |
+| **API 로직** | `diagnose.jsx` | Claude API 프롬프트 & 응답 파싱 |
+| **상태 관리** | `App.jsx` | Scene 전환 & 데이터 흐름 |
+
+---
+
+## 📌 개발 우선순위
+
+- [ ] `Landing.jsx` — 입력 UI 완성
+- [ ] `diagnose.jsx` — Claude API 연결 & 프롬프트 튜닝
+- [ ] `Loading.jsx` — 스캐닝 애니메이션
+- [ ] `Result.jsx` — 결과 카드 (게이지, 로드맵, 도구 추천)
+- [ ] 결과 카드 이미지 공유 기능
+
+---
+
+## 💬 만든 이유
+
+> "불안은 구체적인데, 해결책은 추상적이다."
+
+유튜브 영상은 너무 일반적이고, 블로그는 내 직무에 안 맞고, ChatGPT에 물어보면 형식도 없다.  
+**AI 생존 진단기**는 자연어 입력 하나로 나에게 맞는 답을 30초 안에 내놓는다.
+
+---
+
+*Vibe Coding Hackathon 2026 출품작*
