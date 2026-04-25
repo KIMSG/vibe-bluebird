@@ -139,12 +139,12 @@
 <script type="text/babel" src="src/Landing.jsx"></script>
 <script type="text/babel">
   function LandingPage() {
-    const onSubmit = (text) => {
+    const onSubmit = (text, mode) => {
       sessionStorage.setItem('diagInput', text);
-      sessionStorage.setItem('diagMode', 'mock');
+      sessionStorage.setItem('diagMode', mode);
       window.location.href = 'loading.html';
     };
-    return <window.Landing onSubmit={onSubmit} mode="mock" setMode={() => {}} />;
+    return <window.Landing onSubmit={onSubmit} />;
   }
   ReactDOM.createRoot(document.getElementById('app')).render(<LandingPage />);
 </script>

@@ -11,8 +11,11 @@ function Landing({ onSubmit }){
   const [text, setText] = useState('');
   const [apiKey, setApiKey] = useState(sessionStorage.getItem('claudeApiKey') || '');
   const [shake, setShake] = useState(false);
+  const [keyShake, setKeyShake] = useState(false);
+  const [keyError, setKeyError] = useState(false);
   const [keyVisible, setKeyVisible] = useState(false);
   const taRef = useRef(null);
+  const keyRef = useRef(null);
 
   useEffect(()=>{ taRef.current?.focus(); }, []);
 
@@ -22,10 +25,16 @@ function Landing({ onSubmit }){
       setTimeout(()=>setShake(false), 350);
       return;
     }
-    const trimmedKey = apiKey.trim();
-    sessionStorage.setItem('claudeApiKey', trimmedKey);
-    const mode = trimmedKey ? 'real' : 'mock';
-    onSubmit(text.trim(), mode);
+    if (!apiKey.trim()) {
+      setKeyShake(true);
+      setKeyError(true);
+      setTimeout(()=>setKeyShake(false), 350);
+      keyRef.current?.focus();
+      return;
+    }
+    setKeyError(false);
+    sessionStorage.setItem('claudeApiKey', apiKey.trim());
+    onSubmit(text.trim(), 'real');
   };
 
   const onKey = (e) => {
@@ -41,7 +50,7 @@ function Landing({ onSubmit }){
         <div style={{display:'flex', alignItems:'center', gap:14}}>
           <Logo />
           <div>
-            <div className="mono" style={{fontSize:11, letterSpacing:'.2em', color:'var(--warn)', opacity:.8}}>SYSTEM // v1.0.0</div>
+            <div className="mono" style={{fontSize:11, letterSpacing:'.2em', color:'var(--warn)', opacity:.8}}>VER 1.0.0</div>
             <div style={{fontWeight:900, fontSize:18, letterSpacing:'-.01em'}}>AI 생존 진단기</div>
           </div>
         </div>
@@ -54,9 +63,9 @@ function Landing({ onSubmit }){
         </div>
 
         <h1 style={{fontSize:'clamp(44px, 6.5vw, 84px)', lineHeight:1, margin:'0 0 20px', letterSpacing:'-.035em', fontWeight:800}}>
-          AI 시대,<br/>
-          나의 커리어<br/>
-          <span style={{color:'var(--warn)'}}>경쟁력</span>은?
+          AI가 당신을<br/>
+          대체할 확률은<br/>
+          <span style={{color:'var(--warn)'}}>몇 %</span>일까요?
           <span className="cursor" style={{marginLeft:8, height:'.65em', display:'inline-block', verticalAlign:'baseline'}}></span>
         </h1>
         <p style={{fontSize:17, color:'var(--paper-2)', maxWidth:680, lineHeight:1.6, margin:'0 0 36px', opacity:.8}}>
@@ -77,13 +86,13 @@ function Landing({ onSubmit }){
             onKeyDown={onKey}
           />
           <div style={{display:'flex', justifyContent:'space-between', marginTop:10, padding:'0 4px', fontSize:12, color:'var(--paper-2)', opacity:.6}}>
-            <span className="mono">{text.length} chars · 최소 10자</span>
+            <span className="mono">{text.length}자 · 최소 10자</span>
           </div>
         </div>
 
         {/* 예시 칩 */}
         <div style={{marginTop:28}}>
-          <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:10}}>예시 프롬프트 ↓</div>
+          <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:10}}>이렇게 적어보세요</div>
           <div style={{display:'flex', gap:10, flexWrap:'wrap'}}>
             {EXAMPLES.map((ex,i)=>(
               <button key={i} className="chip" onClick={()=>{setText(ex); taRef.current?.focus();}}>
@@ -101,20 +110,22 @@ function Landing({ onSubmit }){
              style={{display:'inline-flex', alignItems:'center', gap:4, fontSize:13, color:'var(--warn)', textDecoration:'none', marginBottom:10, opacity:.85}}>
             Google AI Studio에서 발급받기 →
           </a>
-          <div style={{position:'relative', maxWidth:480}}>
+          <div className={keyShake ? 'shake' : ''} style={{position:'relative', maxWidth:480}}>
             <input
+              ref={keyRef}
               type={keyVisible ? 'text' : 'password'}
               value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
+              onChange={e => { setApiKey(e.target.value); if(e.target.value.trim()) setKeyError(false); }}
               placeholder="Gemini API Key"
               style={{
                 width:'100%', height:42, padding:'0 40px 0 14px',
-                background:'rgba(245,239,224,.04)', border:'1px solid var(--line)',
+                background: keyError ? 'rgba(255,106,19,.06)' : 'rgba(245,239,224,.04)',
+                border: `1px solid ${keyError ? 'var(--danger)' : 'var(--line)'}`,
                 borderRadius:10, color:'var(--paper)', fontFamily:'JetBrains Mono, monospace',
-                fontSize:13, outline:'none', transition:'border-color .2s',
+                fontSize:13, outline:'none', transition:'border-color .2s, background .2s',
               }}
-              onFocus={e => e.target.style.borderColor='var(--warn)'}
-              onBlur={e => e.target.style.borderColor='var(--line)'}
+              onFocus={e => e.target.style.borderColor = keyError ? 'var(--danger)' : 'var(--warn)'}
+              onBlur={e => e.target.style.borderColor = keyError ? 'var(--danger)' : 'var(--line)'}
             />
             <button
               onClick={()=>setKeyVisible(v=>!v)}
@@ -125,6 +136,11 @@ function Landing({ onSubmit }){
               }}
             >{keyVisible ? '🙈' : '👁'}</button>
           </div>
+          {keyError && (
+            <div style={{marginTop:8, fontSize:13, color:'var(--danger)', display:'flex', alignItems:'center', gap:6}}>
+              ⚠ 진단을 시작하려면 Gemini API 키가 필요합니다.
+            </div>
+          )}
         </div>
 
         {/* CTA */}
