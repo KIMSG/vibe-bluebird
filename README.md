@@ -41,87 +41,12 @@
 - 🤖 **지금 당장 써야 할 AI 도구 추천** (직무 맞춤)
 - 📤 결과 카드 공유 (이미지 저장 / 링크 복사)
 
----
-
-## 🗂 파일 구조
-
-```
-├── index.html            # 진입점, 전역 스타일 & 디자인 토큰
-├── tweaks-panel.jsx      # 개발용 디버그 패널
-└── src/
-    ├── App.jsx           # Scene 라우터 (landing → loading → result)
-    ├── Landing.jsx       # 입력 UI (textarea + 직군 칩)
-    ├── Loading.jsx       # 분석 중 애니메이션
-    ├── Result.jsx        # 결과 카드 (위험도 게이지, 스킬트리, 도구 추천)
-    └── diagnose.jsx      # Claude API 호출 & 응답 파싱
-```
 
 ---
 
 ## 🎨 디자인 시스템
 
 **컨셉:** 위협적이지만 유머러스한 경고 감성 (노랑 + 주황 베이스)
-
-| 토큰 | 값 | 용도 |
-|---|---|---|
-| `--bg` | `#1a1308` | 배경 (짙은 갈색-검정) |
-| `--warn` | `#ffb400` | 포인트 (경고 노랑) |
-| `--danger` | `#ff6a13` | 위험 (주황) |
-| `--crit` | `#e60000` | 임계 (빨강) |
-| `--safe` | `#6cd05e` | 안전 (초록) |
-
-**폰트:**
-- `Gothic A1` — 본문
-- `JetBrains Mono` — 수치·코드
-- `Gaegu` — 손글씨 포인트
-
----
-
-## ⚙️ 기술 스택
-
-| | |
-|---|---|
-| **프레임워크** | React 18 (CDN, 빌드 없음) |
-| **번들러** | Babel Standalone (브라우저 직접 트랜스파일) |
-| **AI** | Claude API (`diagnose.jsx`) |
-| **스타일** | CSS Variables + 인라인 스타일 |
-
----
-
-## 🚀 로컬 실행
-
-빌드 과정 없이 정적 파일 서버만 있으면 됩니다.
-
-```bash
-# 방법 1 — Python
-python -m http.server 8080
-
-# 방법 2 — Node.js
-npx serve .
-
-# 방법 3 — VS Code
-# Live Server 익스텐션으로 index.html 열기
-```
-
----
-
-## 🤝 분업 가이드
-
-| 담당 영역 | 파일 | 주요 작업 |
-|---|---|---|
-| **UI / 디자인** | `Landing.jsx`, `Loading.jsx`, `Result.jsx` | 화면 구성 및 애니메이션 |
-| **API 로직** | `diagnose.jsx` | Claude API 프롬프트 & 응답 파싱 |
-| **상태 관리** | `App.jsx` | Scene 전환 & 데이터 흐름 |
-
----
-
-## 📌 개발 우선순위
-
-- [ ] `Landing.jsx` — 입력 UI 완성
-- [ ] `diagnose.jsx` — Claude API 연결 & 프롬프트 튜닝
-- [ ] `Loading.jsx` — 스캐닝 애니메이션
-- [ ] `Result.jsx` — 결과 카드 (게이지, 로드맵, 도구 추천)
-- [ ] 결과 카드 이미지 공유 기능
 
 ---
 
