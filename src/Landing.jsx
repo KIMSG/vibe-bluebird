@@ -50,7 +50,7 @@ function Landing({ onSubmit }){
         <div style={{display:'flex', alignItems:'center', gap:14}}>
           <Logo />
           <div>
-            <div className="mono" style={{fontSize:11, letterSpacing:'.2em', color:'var(--warn)', opacity:.8}}>SYSTEM // v1.0.0</div>
+            <div className="mono" style={{fontSize:11, letterSpacing:'.2em', color:'var(--warn)', opacity:.8}}>VER 1.0.0</div>
             <div style={{fontWeight:900, fontSize:18, letterSpacing:'-.01em'}}>AI 생존 진단기</div>
           </div>
         </div>
@@ -63,9 +63,9 @@ function Landing({ onSubmit }){
         </div>
 
         <h1 style={{fontSize:'clamp(44px, 6.5vw, 84px)', lineHeight:1, margin:'0 0 20px', letterSpacing:'-.035em', fontWeight:800}}>
-          AI 시대,<br/>
-          나의 커리어<br/>
-          <span style={{color:'var(--warn)'}}>경쟁력</span>은?
+          AI가 당신을<br/>
+          대체할 확률은<br/>
+          <span style={{color:'var(--warn)'}}>몇 %</span>일까요?
           <span className="cursor" style={{marginLeft:8, height:'.65em', display:'inline-block', verticalAlign:'baseline'}}></span>
         </h1>
         <p style={{fontSize:17, color:'var(--paper-2)', maxWidth:680, lineHeight:1.6, margin:'0 0 36px', opacity:.8}}>
@@ -86,13 +86,13 @@ function Landing({ onSubmit }){
             onKeyDown={onKey}
           />
           <div style={{display:'flex', justifyContent:'space-between', marginTop:10, padding:'0 4px', fontSize:12, color:'var(--paper-2)', opacity:.6}}>
-            <span className="mono">{text.length} chars · 최소 10자</span>
+            <span className="mono">{text.length}자 · 최소 10자</span>
           </div>
         </div>
 
         {/* 예시 칩 */}
         <div style={{marginTop:28}}>
-          <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:10}}>예시 프롬프트 ↓</div>
+          <div style={{fontSize:13, color:'var(--paper-2)', opacity:.65, marginBottom:10}}>이렇게 적어보세요</div>
           <div style={{display:'flex', gap:10, flexWrap:'wrap'}}>
             {EXAMPLES.map((ex,i)=>(
               <button key={i} className="chip" onClick={()=>{setText(ex); taRef.current?.focus();}}>
